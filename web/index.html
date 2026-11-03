@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minha Letra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#dfe5ec;      /* mesa cinza-azulada */
+  --panel:#f6f8fb;
+  --paper:#fffef9;
+  --rule:#a9c8e8;      /* pauta azul */
+  --margin:#e48a8a;    /* margem vermelha */
+  --ink:#1d2f7a;       /* esferográfica azul */
+  --graphite:#2a2f38;
+  --muted:#5d6675;
+  --line:#c9d2dd;
+  --focus:#3b6fd8;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:"Instrument Sans",system-ui,sans-serif;
+  color:var(--graphite);background:var(--desk);
+  font-size:15px;line-height:1.5;
+}
+.app{display:grid;grid-template-columns:minmax(320px,410px) 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:28px 26px 40px;display:flex;flex-direction:column;gap:30px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
+.brand span{color:var(--muted);font-size:14px}
+.step h2{font-size:16px;font-weight:600;margin:0 0 4px;display:flex;gap:10px;align-items:center}
+.step h2 b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:600}
+.step p.hint{margin:0 0 12px;color:var(--muted);font-size:14px}
+label.f{display:block;font-size:13px;font-weight:500;margin:12px 0 5px}
+input[type=text],textarea,select{
+  width:100%;font:inherit;color:inherit;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+}
+textarea{min-height:120px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,canvas:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.pad-wrap{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+canvas#pad{display:block;width:100%;height:150px;touch-action:none;cursor:crosshair}
+.pad-empty{position:absolute;inset:0;display:grid;place-items:center;color:#9aa5b4;font-size:14px;pointer-events:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--graphite);padding:8px 13px;font-size:14px}
+button:hover{border-color:#9fabba}
+button.primary{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600;padding:12px 18px;font-size:15px;width:100%}
+button.primary:hover{background:#15235e}
+button[disabled]{opacity:.55;cursor:progress}
+.tools{margin-top:8px;justify-content:space-between}
+.small{font-size:13px;color:var(--muted)}
+.swatches{display:flex;gap:8px}
+.swatches button{width:30px;height:30px;padding:0;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 3px #fff}
+.swatches button[aria-pressed=true]{border-color:var(--graphite)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.photo-btn{width:100%;margin-top:10px;border-style:dashed;padding:11px}
+button.dark{background:var(--graphite);border-color:var(--graphite);color:#fff;font-weight:600}
+.crop{margin-top:12px}
+.crop-stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;touch-action:none;user-select:none;cursor:crosshair;background:#fff}
+.crop-stage img{display:block;width:100%;height:auto;pointer-events:none}
+.crop-sel{position:absolute;border:2px solid var(--ink);background:rgba(29,47,122,.10);box-shadow:0 0 0 9999px rgba(20,25,35,.35)}
+.sheet g.linha{cursor:pointer}
+.sheet g.linha:hover .hit,.sheet g.linha:focus .hit{fill:rgba(29,47,122,.06)}
+.sheet g.linha.busy{opacity:.35}
+details{font-size:14px}
+details summary{cursor:pointer;color:var(--muted)}
+
+main{padding:40px clamp(16px,4vw,56px);display:flex;flex-direction:column;align-items:center;gap:16px}
+.sheet{
+  width:min(900px,100%);min-height:min(1160px,calc(100vh - 140px));background:var(--paper);position:relative;
+  box-shadow:0 1px 0 #c3ccd8,0 14px 40px -18px rgba(30,45,80,.35);
+  background-image:linear-gradient(to right,transparent 53px,var(--margin) 53px,var(--margin) 54.5px,transparent 54.5px),
+    repeating-linear-gradient(to bottom,transparent 0 94px,var(--rule) 94px 95px,transparent 95px 158px);
+}
+.sheet.has-result{background:none;box-shadow:none;min-height:0;display:flex;flex-direction:column;gap:28px}
+.sheet svg{display:block;width:100%;height:auto}
+.sheet .page{background:var(--paper);box-shadow:0 1px 0 #c3ccd8,0 14px 40px -18px rgba(30,45,80,.35);position:relative}
+.sheet .page-n{position:absolute;right:14px;bottom:8px;font-size:12px;color:#9aa5b4}
+@media print{
+  @page{size:A4;margin:0}
+  html,body{background:#fffdf7;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  aside,.status,.actions,.placeholder{display:none!important}
+  .app{display:block;min-height:0}
+  main{padding:0;margin:0;display:block;min-height:0}
+  .sheet,.sheet.has-result{display:block;width:auto;min-height:0;margin:0;padding:0;box-shadow:none;background:none}
+  /* cada folha ocupa exatamente uma A4, sem vazar para a próxima */
+  .sheet .page{width:210mm;height:290mm;margin:0;box-shadow:none;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;background:#fffdf7;
+    break-inside:avoid;page-break-inside:avoid;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet .page + .page{break-before:page;page-break-before:always}
+  .sheet .page svg{width:100%;height:100%}
+  .sheet .hit{fill:transparent!important}
+  .sheet g.linha{outline:none!important}
+  .sheet g.linha.busy{opacity:1}
+  .sheet .page-n{display:none}
+}
+.placeholder{position:absolute;left:78px;top:62px;right:30px;color:#8e9aac;font-size:17px;max-width:46ch}
+.placeholder strong{display:block;color:var(--graphite);font-weight:600;font-size:22px;margin-bottom:6px}
+.status{min-height:22px;color:var(--muted);font-size:14px}
+.status.err{color:#b3261e}
+.actions{display:none;gap:8px}
+.actions.show{display:flex;flex-wrap:wrap;justify-content:center}
+.actions button{white-space:nowrap}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  aside{border-right:0;border-bottom:1px solid var(--line);padding:22px 16px 28px}
+  main{padding:20px 16px 40px}
+  .sheet{min-height:420px}
+  .placeholder{left:66px;top:40px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><h1>Minha Letra</h1><span>seu texto, escrito por você</span></div>
+    <div class="small" id="device" style="margin-top:-22px"></div>
+
+    <section class="step" aria-labelledby="s1">
+      <h2 id="s1"><b>1</b>Ensine sua letra</h2>
+      <p class="hint">Escreva a frase abaixo numa linha só, do seu jeito normal: no quadro, ou no caderno e mande uma foto.</p>
+      <label class="f" for="phrase">Frase da amostra</label>
+      <input id="phrase" type="text" maxlength="70" value="Fiz jogo de bola com o cachorro, quieto e veloz" aria-describedby="phraseHelp">
+      <div class="small" id="phraseHelp">Se você escreveu outra frase no caderno, troque o texto aqui para ficar igual.</div>
+      <div class="pad-wrap" style="margin-top:10px">
+        <canvas id="pad" tabindex="0" aria-label="Quadro para escrever a frase de amostra com o dedo, mouse ou caneta"></canvas>
+        <div class="pad-empty" id="padEmpty">Escreva aqui com o dedo, a caneta ou o mouse</div>
+      </div>
+      <div class="row tools">
+        <div class="row"><button id="undo" type="button">Desfazer traço</button><button id="clear" type="button">Limpar</button></div>
+        <span class="small" id="padInfo"></span>
+      </div>
+      <button type="button" id="photoBtn" class="photo-btn">Usar foto do caderno</button>
+      <input type="file" id="photoInput" accept="image/*" hidden>
+      <div class="crop" id="crop" hidden>
+        <p class="hint" id="cropHint">Arraste sobre a foto para marcar só a linha com a frase.</p>
+        <div class="crop-stage" id="cropStage">
+          <img id="cropImg" alt="Foto enviada do caderno">
+          <div class="crop-sel" id="cropSel" hidden></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button type="button" id="cropOk" class="dark">Ler esta linha</button>
+          <button type="button" id="cropCancel">Cancelar</button>
+        </div>
+      </div>
+      <details style="margin-top:12px">
+        <summary>Sem tablet agora? Use uma letra de exemplo</summary>
+        <label class="f" for="style">Letra de exemplo (usada quando o quadro está vazio)</label>
+        <select id="style">
+          <option value="9">Inclinada e rápida</option><option value="3">Redonda e solta</option>
+          <option value="8">Firme, letra de forma</option><option value="12">Apertada e alta</option>
+          <option value="5">Pequena e regular</option><option value="1">Cursiva clássica</option>
+          <option value="7">Espaçada</option><option value="11">Corrida</option>
+        </select>
+      </details>
+    </section>
+
+    <section class="step" aria-labelledby="s2">
+      <h2 id="s2"><b>2</b>Escreva o texto</h2>
+      <p class="hint">Cole ou digite o que quer passar para a folha.</p>
+      <label class="f" for="text">Texto</label>
+      <div class="small" id="textHelp" style="margin:-2px 0 6px">Funciona com fórmulas (x+5/2, dy/dx, ∫_0^1, √(x+1), LaTeX), matrizes ([1 2; 3 4]), sistemas ({ x+y=3; x-y=1 }), tabelas e circuitos: <code>circuito: bateria(12 V) - R1(10 Ω) - (R2 || C1)</code>.</div>
+      <textarea id="text" maxlength="30000" aria-describedby="textHelp">Fotossíntese: as plantas usam a luz do sol, a água e o gás carbônico para produzir glicose e liberar oxigênio.
+Ela acontece nos cloroplastos, onde fica a clorofila.</textarea>
+      <div class="grid2">
+        <div>
+          <label class="f" for="neat">Capricho</label>
+          <input id="neat" type="range" min="0.2" max="2.4" step="0.1" value="1.2" aria-describedby="neatHelp">
+          <div class="small" id="neatHelp">Mais à direita, letra mais uniforme</div>
+        </div>
+        <div>
+          <label class="f" for="nat">Naturalidade</label>
+          <input id="nat" type="range" min="0" max="2" step="0.1" value="1" aria-describedby="natHelp">
+          <div class="small" id="natHelp">Variação de linha, inclinação e pressão</div>
+        </div>
+      </div>
+      <label class="f" for="paper">Papel</label>
+      <select id="paper"><option value="pautado">Pautado</option><option value="quadriculado">Quadriculado</option><option value="branco">Liso</option></select>
+      <label class="f" id="inkLbl">Caneta</label>
+      <div class="swatches" role="group" aria-labelledby="inkLbl">
+        <button type="button" data-ink="#1d2f7a" style="background:#1d2f7a" aria-pressed="true" aria-label="Azul"></button>
+        <button type="button" data-ink="#1c1c1f" style="background:#1c1c1f" aria-pressed="false" aria-label="Preta"></button>
+        <button type="button" data-ink="#b3261e" style="background:#b3261e" aria-pressed="false" aria-label="Vermelha"></button>
+        <button type="button" data-ink="#3f6d3a" style="background:#3f6d3a" aria-pressed="false" aria-label="Verde"></button>
+      </div>
+      <div style="margin-top:22px"><button class="primary" id="go" type="button">Escrever na folha</button></div>
+    </section>
+  </aside>
+
+  <main>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="sheet" id="sheet">
+      <div class="placeholder" id="placeholder"><strong>Sua folha aparece aqui</strong>Ensine sua letra no quadro, cole um texto e toque em "Escrever na folha". A IA escreve linha por linha como se fosse você.</div>
+    </div>
+    <div class="actions" id="actions">
+      <button type="button" id="again">Escrever de novo</button>
+      <button type="button" id="dlPng">Baixar PNG</button>
+      <button type="button" id="dlSvg">Baixar SVG</button>
+      <button type="button" id="print">Imprimir / salvar PDF</button>
+    </div>
+    <div class="actions" id="actions2" aria-label="Exportar só a escrita, sem fundo">
+      <span class="small" style="align-self:center">Só a escrita, sem fundo:</span>
+      <button type="button" id="cpClean">Copiar imagem</button>
+      <button type="button" id="dlCleanPng">PNG transparente</button>
+      <button type="button" id="dlCleanSvg">SVG transparente</button>
+    </div>
+  </main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const pad = $('#pad'), ctx = pad.getContext('2d');
+let strokes = [], current = null, ink = '#1d2f7a', lastPages = [], fromPhoto = false, lastBody = null, photoSample = null;
+
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+function sizePad(){
+  const r = pad.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  pad.width = r.width * dpr; pad.height = r.height * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0); redraw();
+}
+function redraw(){
+  const w = pad.clientWidth, h = pad.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--rule');
+  ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, h*0.68); ctx.lineTo(w, h*0.68); ctx.stroke();
+  ctx.strokeStyle = '#1d2f7a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const s of strokes) drawStroke(s);
+  $('#padEmpty').style.display = strokes.length ? 'none' : 'grid';
+  const n = strokes.length;
+  $('#padInfo').textContent = n ? (fromPhoto ? `lido da foto: ${n} traços` : n + (n === 1 ? ' traço' : ' traços')) : '';
+}
+function saveSample(){ store.set('amostra', strokes.length ? {phrase: $('#phrase').value, strokes, fromPhoto, photoSample} : null); }
+function drawStroke(s){
+  if (!s.length) return;
+  ctx.beginPath(); ctx.moveTo(s[0][0], s[0][1]);
+  if (s.length === 1) ctx.lineTo(s[0][0]+.5, s[0][1]+.5);
+  for (const p of s) ctx.lineTo(p[0], p[1]);
+  ctx.stroke();
+}
+function pos(e){ const r = pad.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, e.timeStamp]; }
+pad.addEventListener('pointerdown', e => {
+  if (fromPhoto){ strokes = []; fromPhoto = false; photoSample = null; }  // escrever à mão substitui a amostra da foto
+  pad.setPointerCapture(e.pointerId); current = [pos(e)]; strokes.push(current); redraw();
+});
+pad.addEventListener('pointermove', e => {
+  if (!current) return;
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  for (const ev of evs) current.push(pos(ev));
+  redraw();
+});
+const end = () => { if (current){ current = null; saveSample(); } };
+pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end);
+$('#undo').onclick = () => { strokes.pop(); if (!strokes.length){ fromPhoto = false; photoSample = null; } redraw(); saveSample(); };
+$('#clear').onclick = () => { strokes = []; fromPhoto = false; photoSample = null; redraw(); saveSample(); };
+$('#phrase').addEventListener('change', () => {
+  if (fromPhoto && photoSample){ photoSample = null; setStatus('A frase mudou. Leia a foto de novo para a IA aprender com a frase certa.', true); }
+  saveSample();
+});
+window.addEventListener('resize', () => { const old = pad.clientWidth; sizePad(); });
+
+const saved = store.get('amostra');
+if (saved && saved.strokes){ strokes = saved.strokes; fromPhoto = !!saved.fromPhoto; photoSample = saved.photoSample || null; $('#phrase').value = saved.phrase || $('#phrase').value; }
+sizePad();
+
+/* ---------- foto do caderno ---------- */
+const cropImg = $('#cropImg'), cropStage = $('#cropStage'), cropSel = $('#cropSel');
+let sel = null, dragFrom = null;
+$('#photoBtn').onclick = () => $('#photoInput').click();
+$('#photoInput').onchange = e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  if (cropImg.src) URL.revokeObjectURL(cropImg.src);
+  cropImg.src = URL.createObjectURL(f);
+  sel = null; cropSel.hidden = true;
+  $('#crop').hidden = false; $('#photoBtn').hidden = true;
+  $('#cropHint').textContent = 'Arraste sobre a foto para marcar só a linha com a frase.';
+  e.target.value = '';
+  cropImg.onload = () => $('#crop').scrollIntoView({block:'nearest', behavior:'smooth'});
+};
+function stagePt(e){ const r = cropStage.getBoundingClientRect(); return [Math.min(Math.max(e.clientX - r.left, 0), r.width), Math.min(Math.max(e.clientY - r.top, 0), r.height)]; }
+function drawSel(){ if (!sel){ cropSel.hidden = true; return; } Object.assign(cropSel.style, {left: sel.x+'px', top: sel.y+'px', width: sel.w+'px', height: sel.h+'px'}); cropSel.hidden = false; }
+cropStage.addEventListener('pointerdown', e => { cropStage.setPointerCapture(e.pointerId); dragFrom = stagePt(e); sel = {x: dragFrom[0], y: dragFrom[1], w: 0, h: 0}; drawSel(); });
+cropStage.addEventListener('pointermove', e => {
+  if (!dragFrom) return;
+  const p = stagePt(e);
+  sel = {x: Math.min(p[0], dragFrom[0]), y: Math.min(p[1], dragFrom[1]), w: Math.abs(p[0]-dragFrom[0]), h: Math.abs(p[1]-dragFrom[1])};
+  drawSel();
+});
+cropStage.addEventListener('pointerup', () => { dragFrom = null; if (sel && (sel.w < 12 || sel.h < 8)){ sel = null; drawSel(); } });
+$('#cropCancel').onclick = closeCrop;
+function closeCrop(){ $('#crop').hidden = true; $('#photoBtn').hidden = false; sel = null; }
+
+$('#cropOk').onclick = async () => {
+  if (!cropImg.naturalWidth) return;
+  // recorta na resolução original da foto
+  const NW = cropImg.naturalWidth, NH = cropImg.naturalHeight, k = NW / cropStage.clientWidth;
+  // a seleção vai com folga em volta (para não cortar as perninhas do g, p, q);
+  // o servidor usa a posição marcada para separar essa linha das vizinhas
+  let focus = null, sx = 0, sy = 0, sw = NW, sh = NH;
+  if (sel){
+    const x0 = sel.x * k, y0 = sel.y * k, w0 = sel.w * k, h0 = sel.h * k;
+    sx = Math.max(0, x0 - 0.02 * w0); sw = Math.min(NW, x0 + w0 * 1.02) - sx;
+    sy = Math.max(0, y0 - 0.6 * h0); sh = Math.min(NH, y0 + h0 * 1.6) - sy;
+    focus = [(y0 - sy) / sh, (y0 + h0 - sy) / sh];
+  }
+  const f = Math.min(1, 2000 / sw);
+  const c = document.createElement('canvas'); c.width = Math.round(sw * f); c.height = Math.round(sh * f);
+  c.getContext('2d').drawImage(cropImg, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  const btn = $('#cropOk'); btn.disabled = true; btn.textContent = 'Estudando sua letra…';
+  $('#cropHint').textContent = 'Lendo a foto e treinando a mão da IA com a sua letra. Leva uns 20 segundos.';
+  try{
+    const r = await fetch('/api/photo', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({image: c.toDataURL('image/jpeg', 0.92), phrase: $('#phrase').value, focus})});
+    const data = await r.json();
+    if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Não consegui ler a foto.');
+    loadPhotoStrokes(data);
+    closeCrop();
+    if (data.warning) setStatus(data.warning, !data.ok);
+    else setStatus('Pronto: a IA aprendeu sua letra com a foto. Agora é só escrever na folha.');
+  }catch(err){
+    $('#cropHint').textContent = err.message + ' Tente marcar só a linha escrita.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Ler esta linha';
+  }
+};
+function loadPhotoStrokes(data){
+  const W = pad.clientWidth, H = pad.clientHeight;
+  const s = Math.min((W - 24) / data.width, (H - 24) / data.height);
+  const ox = (W - data.width * s) / 2, oy = (H - data.height * s) / 2;
+  strokes = data.strokes.map(st => st.map(([x, y]) => [x * s + ox, y * s + oy]));
+  photoSample = data.sample || null;
+  fromPhoto = true; redraw(); saveSample();
+}
+
+document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.swatches button').forEach(x => x.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true'); ink = b.dataset.ink;
+});
+
+function setStatus(msg, err){ const s = $('#status'); s.textContent = msg; s.classList.toggle('err', !!err); }
+
+async function write(){
+  const text = $('#text').value.trim();
+  if (!text){ setStatus('Escreva algum texto no passo 2.', true); $('#text').focus(); return; }
+  const usingSample = strokes.length > 0;
+  const body = {
+    text, neatness: parseFloat($('#neat').value), naturalness: parseFloat($('#nat').value), paper: $('#paper').value, ink,
+    sample: !usingSample ? null : (fromPhoto && photoSample ? {text: photoSample.text, offsets: photoSample.offsets} : {text: $('#phrase').value, strokes}),
+    style: usingSample ? null : parseInt($('#style').value, 10)
+  };
+  $('#go').disabled = true; $('#again').disabled = true;
+  const long = text.length > 1500;
+  setStatus((usingSample ? 'Estudando sua letra e escrevendo…' : 'Escrevendo com a letra de exemplo…')
+    + (long ? ` Texto longo (${text.length} caracteres): pode levar alguns minutos, ainda mais sem GPU.` : ''));
+  try{
+    const r = await fetch('/api/generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail && typeof data.detail === 'string' ? data.detail : 'Não deu para gerar. Confira o texto e a amostra.');
+    lastBody = body;
+    show(data.pages || [data.svg]);
+    const weak = data.weak_lines || [];
+    const tip = weak.length
+      ? ` A${weak.length > 1 ? 's linhas ' + weak.slice(0, -1).join(', ') + ' e ' + weak.at(-1) + ' podem' : ' linha ' + weak[0] + ' pode'} ter saído confusa${weak.length > 1 ? 's' : ''}: toque nela${weak.length > 1 ? 's' : ''} para reescrever.`
+      : ' Alguma linha saiu estranha? Toque nela para reescrever.';
+    const np = (data.pages || [1]).length;
+    setStatus(`Pronto em ${data.seconds}s` + (np > 1 ? `, ${np} folhas` : '') + (usingSample ? '' : ' (letra de exemplo)') + '.' + tip
+      + (data.unsupported ? ' ' + data.unsupported + '.' : ''), !!data.unsupported);
+  }catch(err){
+    setStatus(err.message || 'O servidor não respondeu. Ele está rodando?', true);
+  }finally{
+    $('#go').disabled = false; $('#again').disabled = false;
+  }
+}
+
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animatePaths(paths){
+  if (reduceMotion()) return;
+  // cada traço "sai da caneta" na ordem em que foi gerado; com pressão, um traço
+  // é vários pedacinhos (<g class="st">): seguem direto, e a pausa é só quando a caneta levanta
+  let t = 0, prevGroup = null; const speed = 0.9; // px por ms
+  for (const p of paths){
+    const group = p.parentNode && p.parentNode.classList && p.parentNode.classList.contains('st') ? p.parentNode : p;
+    if (prevGroup && group !== prevGroup) t += 25;
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    const dur = Math.max(len / speed, group === p ? 30 : 2);
+    // invisível até a vez dele (senão a ponta arredondada aparece como um pontinho)
+    p.animate([{strokeDashoffset: len, opacity: 0, offset: 0}, {strokeDashoffset: len * 0.999, opacity: 1, offset: 0.001},
+               {strokeDashoffset: 0, opacity: 1}], {duration: dur, delay: t, fill: 'both', easing: 'linear'});
+    t += dur;
+    prevGroup = group;
+  }
+}
+
+function show(pages){
+  lastPages = pages;
+  const sheet = $('#sheet');
+  sheet.innerHTML = pages.map((svg, k) => `<div class="page">${svg}${pages.length > 1 ? `<span class="page-n">${k + 1}/${pages.length}</span>` : ''}</div>`).join('');
+  sheet.classList.add('has-result');
+  $('#actions').classList.add('show'); $('#actions2').classList.add('show');
+  $('#dlPng').textContent = pages.length > 1 ? `Baixar PNG (${pages.length} folhas)` : 'Baixar PNG';
+  $('#dlSvg').textContent = pages.length > 1 ? `Baixar SVG (${pages.length} folhas)` : 'Baixar SVG';
+  sheet.querySelectorAll('g.linha').forEach(g => {
+    g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+    g.setAttribute('aria-label', `Reescrever a linha ${+g.dataset.line + 1}`);
+    g.addEventListener('click', () => regenLine(g));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); regenLine(g); } });
+  });
+  // anima só a primeira folha (as outras já aparecem prontas)
+  animatePaths([...sheet.querySelector('.page svg').querySelectorAll('g path')]);
+}
+
+async function regenLine(g){
+  if (!lastBody || g.classList.contains('busy')) return;
+  const i = +g.dataset.line;
+  g.classList.add('busy');
+  setStatus(`Reescrevendo a linha ${i + 1}…`);
+  try{
+    const r = await fetch('/api/line', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({...lastBody, line_index: i, seed: Math.floor(Math.random() * 1e9)})});
+    const data = await r.json();
+    if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Não deu para reescrever essa linha.');
+    [...g.children].forEach(ch => { if (!ch.classList.contains('hit')) ch.remove(); });
+    g.insertAdjacentHTML('beforeend', data.html);
+    animatePaths([...g.querySelectorAll('path')]);
+    lastPages = currentSvgs();
+    setStatus(`Linha ${i + 1} reescrita.`);
+  }catch(err){
+    setStatus(err.message, true);
+  }finally{
+    g.classList.remove('busy');
+  }
+}
+
+function currentSvgs(){
+  return [...document.querySelectorAll('#sheet .page svg')].map(orig => {
+    const svg = orig.cloneNode(true);
+    svg.querySelectorAll('path').forEach(p => p.removeAttribute('style'));
+    svg.querySelectorAll('[tabindex],[role],[aria-label]').forEach(n => { n.removeAttribute('tabindex'); n.removeAttribute('role'); n.removeAttribute('aria-label'); });
+    return new XMLSerializer().serializeToString(svg);
+  });
+}
+const currentSvg = () => currentSvgs()[0];
+
+function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+const pageName = (k, ext) => lastPages.length > 1 ? `minha-letra-${String(k + 1).padStart(2, '0')}.${ext}` : `minha-letra.${ext}`;
+$('#dlSvg').onclick = () => lastPages.forEach((svg, k) => setTimeout(() => download(pageName(k, 'svg'), new Blob([svg], {type:'image/svg+xml'})), k * 400));
+$('#dlPng').onclick = () => lastPages.forEach((svg, k) => setTimeout(() => {
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = img.width * 2; c.height = img.height * 2;
+    const g = c.getContext('2d'); g.scale(2,2); g.drawImage(img,0,0);
+    c.toBlob(b => download(pageName(k, 'png'), b), 'image/png');
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}, k * 500));
+// antes de imprimir/salvar PDF: termina a animação, senão sai a folha pela metade (ou em branco)
+function finishDrawing(){
+  document.getAnimations().forEach(a => { try{ a.finish(); }catch(e){} });
+  document.querySelectorAll('#sheet path').forEach(p => p.removeAttribute('style'));
+}
+window.addEventListener('beforeprint', finishDrawing);
+$('#print').onclick = () => { finishDrawing(); requestAnimationFrame(() => window.print()); };
+
+// ---- exportar só a escrita: sem papel, sem pauta, recortado no que foi escrito ----
+function cleanSvgs(pad = 12){
+  const out = [];
+  document.querySelectorAll('#sheet .page svg').forEach(orig => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    orig.querySelectorAll('.tinta path').forEach(p => {
+      const b = p.getBBox(); if (!b.width && !b.height) return;
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
+    });
+    if (!isFinite(x0)) return;                       // folha sem nada escrito
+    const svg = orig.cloneNode(true);
+    svg.querySelectorAll('.fundo, rect.hit').forEach(n => n.remove());
+    svg.querySelectorAll('path').forEach(p => p.removeAttribute('style'));
+    svg.querySelectorAll('[tabindex],[role],[aria-label]').forEach(n => { n.removeAttribute('tabindex'); n.removeAttribute('role'); n.removeAttribute('aria-label'); });
+    const x = x0 - pad, y = y0 - pad, w = x1 - x0 + 2 * pad, h = y1 - y0 + 2 * pad;
+    svg.setAttribute('viewBox', `${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
+    svg.setAttribute('width', w.toFixed(0)); svg.setAttribute('height', h.toFixed(0));
+    out.push({svg: new XMLSerializer().serializeToString(svg), w, h});
+  });
+  return out;
+}
+function svgToPngBlob(svg, w, h, scale = 4){
+  return new Promise((ok, fail) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, c.width, c.height);   // canvas começa transparente
+      c.toBlob(b => b ? ok(b) : fail(new Error('png')), 'image/png');
+    };
+    img.onerror = fail;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+}
+const cleanName = (k, n, ext) => n > 1 ? `minha-letra-escrita-${String(k + 1).padStart(2, '0')}.${ext}` : `minha-letra-escrita.${ext}`;
+$('#dlCleanSvg').onclick = () => { const L = cleanSvgs(); L.forEach((p, k) => setTimeout(() => download(cleanName(k, L.length, 'svg'), new Blob([p.svg], {type:'image/svg+xml'})), k * 400)); };
+$('#dlCleanPng').onclick = () => { const L = cleanSvgs(); L.forEach((p, k) => setTimeout(async () => download(cleanName(k, L.length, 'png'), await svgToPngBlob(p.svg, p.w, p.h)), k * 500)); };
+$('#cpClean').onclick = async () => {
+  const L = cleanSvgs(); if (!L.length) return;
+  try{
+    await navigator.clipboard.write([new ClipboardItem({'image/png': svgToPngBlob(L[0].svg, L[0].w, L[0].h)})]);
+    setStatus(L.length > 1 ? 'Copiei a escrita da 1ª folha. Cole no Word, Docs ou Slides. Para as outras folhas, use "PNG transparente".' : 'Copiei a escrita sem fundo. É só colar no Word, Docs ou Slides.');
+  }catch(e){
+    setStatus('Seu navegador não deixou copiar imagem. Use "PNG transparente" e insira o arquivo no documento.');
+  }
+};
+fetch('/api/info').then(r => r.json()).then(d => { $('#device').textContent = 'Rodando em: ' + d.device; }).catch(() => {});
+$('#go').onclick = write; $('#again').onclick = write;
+</script>
+</body>
+</html>
