@@ -1,0 +1,162 @@
+Resolvi as 5 questões. Confira com o que você fez. Mantive 3 algarismos significativos e indiquei as convenções que usei.
+
+1) v(t) = −311 sen(377t + 45°) V
+
+O sinal negativo equivale a deslocar a fase em 180°:
+−311 sen(377t + 45°) = 311 sen(377t + 45° − 180°) = 311 sen(377t − 135°)
+
+Fasor (pico, referência seno): V = 311∠−135° V
+Fasor (eficaz): V = 311/√2 ≈ 220∠−135° V
+Se o professor usar referência cosseno: 311∠135° V
+ω = 377 rad/s
+f = ω/2π = 60 Hz
+2) Zeq, Yeq, V e I₃ (I = 15∠−20° A)
+
+a) Admitância de cada ramo
+
+Y₁ = 1/j5 = 0,2∠−90° S
+Y₂ = 1/(5 + j8,66) = 1/(10∠60°) = 0,1∠−60° S = 0,05 − j0,0866
+Y₃ = 1/15 = 0,0667∠0° S
+Y₄ = 1/(−j10) = 0,1∠90° S
+
+Somando: Yeq = 0,1167 − j0,1866 = 0,220∠−58,0° S
+
+b) Impedância total: Zeq = 1/Yeq = 4,54∠58,0° Ω (= 2,41 + j3,85 Ω)
+
+c) Tensão e corrente I₃
+
+V = I·Zeq = 15∠−20° × 4,54∠58° = 68,2∠38,0° V
+I₃ = V/15 = 4,54∠38,0° A
+
+d) Diagrama fasorial: I fica a −20° e V a +38°. A tensão está adiantada 58° em relação à corrente, o que indica circuito indutivo.
+
+3) Análise nodal (fonte de tensão: 20∠−90° = −j20 V)
+
+A corrente I passa pelo capacitor: I = V₁/(−j2) = j0,5V₁
+
+a) Equações
+
+Nó V₁: (V₁ + j20)/2 + V₁/(−j2) + (V₁ − V₂)/j1 + 5 = 0
+→ (0,5 − j0,5)V₁ + jV₂ = −5 − j10
+Nó V₂: (V₂ − V₁)/j1 + V₂/4 − 5 − 2I = 0
+→ os termos em V₁ se cancelam, e sobra (0,25 − j)V₂ = 5
+
+b) Solução
+
+V₂ = 5/(0,25 − j1) = 4,85∠76,0° V (1,18 + j4,71)
+V₁ = (−0,294 − j11,18)/(0,5 − j0,5) = 15,8∠−46,5° V (10,88 − j11,47)
+
+c) Corrente I: I = V₁/(−j2) = 7,91∠43,5° A
+
+4) Análise de malhas (40∠30° = 34,64 + j20 V)
+
+a) Equações (correntes no sentido horário)
+
+Malha 1: (j15 − j20)I₁ + j20·I₂ = 40∠30°
+→ −j5·I₁ + j20·I₂ = 34,64 + j20
+Malha 2: j20·I₁ + (50 − j20)I₂ = −50
+
+b) Solução por Cramer
+
+Δ = 300 − j250 = 390,5∠−39,8°
+Δ₁ = 2132 + j1307 = 2501∠31,5°
+Δ₂ = 400 − j442,8 = 596,7∠−47,9°
+
+Resultados:
+
+I₁ = 6,40∠71,3° A
+I₂ = 1,53∠−8,1° A
+
+Substituindo de volta na equação da malha 2, o resultado confere.
+
+5) Impedância vista em a-b
+
+Aplique uma fonte de teste Vₛ em a-b, com corrente Iₛ entrando em a. Chame de Vₓ o nó superior esquerdo.
+
+Pelo capacitor: Vₒ = j2·Iₛ
+KCL no nó Vₓ: Iₛ + 0,2Vₒ = Vₓ/j40
+→ Vₓ = j40·Iₛ(1 + j0,4) = (−16 + j40)Iₛ
+Malha até a: Vₛ = Vₓ + (20 − j2)Iₛ = (4 + j38)Iₛ
+
+Zab = 4 + j38 Ω = 38,2∠84,0° Ω
+
+Se algum valor seu diferir, me diga qual questão e eu reviso com você o passo onde está a diferença.
+
+a 1 tinha que ser em cosseno
+
+Convertendo a função senoidal para forma cosseno.
+Questão 1 (referência cosseno)
+
+Dado: v(t) = −311 sen(377t + 45°) V
+
+Passo 1: converter seno em cosseno. Pela identidade sen(x) = cos(x − 90°):
+
+v(t) = −311 cos(377t + 45° − 90°)
+v(t) = −311 cos(377t − 45°)
+
+Passo 2: eliminar o sinal negativo. Pela identidade −cos(x) = cos(x + 180°):
+
+v(t) = 311 cos(377t − 45° + 180°)
+v(t) = 311 cos(377t + 135°) V
+
+(Atalho: −sen(x) = cos(x + 90°), então −311 sen(377t + 45°) = 311 cos(377t + 135°) direto.)
+
+Passo 3: identificar amplitude e fase.
+Vm = 311 V
+θ = +135°
+
+Passo 4: forma fasorial polar.
+V = 311∠135° V (valor de pico)
+
+Se o professor pedir valor eficaz:
+Vef = 311 / √2 = 311 / 1,4142 = 219,9 ≈ 220 V
+V = 220∠135° V
+
+Passo 5: forma retangular (opcional).
+
+Com o valor de pico:
+Real = 311 · cos135° = 311 · (−0,7071) = −219,9
+Imag = 311 · sen135° = 311 · (+0,7071) = +219,9
+V = −219,9 + j219,9 V
+
+Com o valor eficaz:
+V = −155,6 + j155,6 V
+
+Passo 6: frequências. Não mudam com a referência.
+ω = 377 rad/s
+f = ω / 2π = 377 / 6,2832 → f = 60 Hz
+
+O fasor fica no 2º quadrante (135°). As outras questões não dependem dessa escolha de referência, então continuam iguais.
+
+faça o desenho 2
+
+Para desenhar à mão no transferidor da prova:
+
+Trace o eixo real (horizontal) e o imaginário (vertical).
+Desenhe I a 20° abaixo do eixo real, com comprimento proporcional a 15 A.
+Desenhe V a 38° acima do eixo real, com comprimento proporcional a 68,2 V. A escala pode ser diferente da de I, mas indique isso no desenho.
+Marque o arco de 58° entre os dois e escreva “V adiantada de I → circuito indutivo”.
+
+tem certeza que tá correto?
+
+Verifying the exam answers for accuracy.
+
+Sim. Refiz as verificações substituindo os resultados de volta nas equações, e tudo fecha.
+
+Diagrama (Q2): I está a −20° e V a +38°, então a defasagem é 38° − (−20°) = 58°, com V adiantada (Zeq tem ângulo +58°, indutivo). Somando as correntes dos 4 ramos dá exatamente 15∠−20° A, então V e I₃ estão certos.
+
+Q1: em t = 0, a original dá −311·sen45° = −219,9 V, e 311·cos(135°) também dá −219,9 V. ✓
+
+Q3: substituindo V₁ = 10,88 − j11,47 e V₂ = 1,18 + j4,71:
+
+Nó 1: 5,44 + j4,27 + 5,74 + j5,44 − 16,18 − j9,71 + 5 ≈ 0 ✓
+Nó 2: lado esquerdo = 16,47 + j10,88, e 5 + 2I = 16,47 + j10,88 ✓
+
+Q4: na equação da malha 2, j20·I₁ + (50 − j20)·I₂ = −50,0 + j0,0 ✓
+
+Q5: Zab = 4 + j38 Ω segue direto da LKC e da LKT, sem aproximações.
+
+Só dois pontos dependem de convenção do professor, não de conta:
+
+Q1: valor de pico (311∠135° V) ou eficaz (220∠135° V).
+Q4: o sinal da fonte de 50 V. Usei o + em cima, como na figura. Se você inverter o sentido de alguma malha, os sinais mudam, mas as correntes físicas são as mesmas.
